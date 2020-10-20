@@ -43,7 +43,7 @@ main :: proc() {
 
     fmt.sbprintf(&outstream, "P3\n{} {}\n255\n", image_width, image_height);
     for j : i32 = image_height - 1; j >= 0; j -= 1 {
-        fmt.fprintf(os.stderr, "\rScanlines remaining: {}", j);
+        // fmt.fprintf(os.stderr, "\rScanlines remaining: {}", j);
         for i : i32 = 0; i < image_width; i += 1 {
             pixel_color := rt.Color{0, 0, 0};
             for s : i32 = 0; s < samples_per_pixel; s += 1 {
@@ -78,8 +78,7 @@ ray_color :: proc(ray: rt.Ray, world: []rt.Sphere, depth: i32) -> rt.Color {
 
     hit_record : rt.HitRecord;
 
-    if t_record, did_hit := rt.hit(world, ray, 0.001, rt.infinity, hit_record); did_hit {
-        hit_record = t_record;
+    if did_hit := rt.hit(world, ray, 0.001, rt.infinity, &hit_record); did_hit {
         if attenuation, scattered, ok := rt.scatter(hit_record.material, ray, hit_record); ok {
             next_rc := ray_color(scattered, world, depth - 1);
             return next_rc * attenuation;

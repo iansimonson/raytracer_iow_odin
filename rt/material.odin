@@ -55,11 +55,16 @@ scatter_dielectric :: proc(material: Dielectric, ray: Ray, hit_record: HitRecord
     sin_theta := math.sqrt(1 - cos_theta * cos_theta);
     reflect_probability := schlick(cos_theta, etai_over_etat);
 
+    direction: Vec3;
+    if etai_over_etat * sin_theta > 1 || random() < reflect_probability {
+        direction = reflect_around_vector(unit_direction, hit_record.normal);
+    } else {
+        direction = refract(unit_direction, hit_record.normal, etai_over_etat);
+    }
 
-    reflected := reflect_around_vector(unit_vector(ray.direction), hit_record.normal);
-    scattered = Ray{origin = hit_record.p, direction = reflected};
+    scattered = Ray{origin = hit_record.p, direction = direction};
     attenuation = Color{1, 1, 1};
-    ok = dot(scattered.direction, hit_record.normal) > 0;
+    ok = true;
     return;
 }
 

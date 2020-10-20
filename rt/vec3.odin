@@ -61,5 +61,12 @@ reflect_around_vector :: proc(to_reflect: Vec3, reflect_around: Vec3) -> Vec3 {
     return to_reflect - (reflect_around * magnitude_b * 2);
 }
 
+refract :: proc(light: Vec3, normal: Vec3, etai_over_etat: f64) -> Vec3 {
+    cos_theta := dot(light * -1, normal);
+    r_out_parallel := (normal * cos_theta + light) * etai_over_etat;
+    r_out_perp := normal * (-1 * math.sqrt(1.0 - dot(r_out_parallel, r_out_parallel)));
+    return r_out_parallel + r_out_perp;
+}
+
 Point3 :: distinct [3]f64;
 
