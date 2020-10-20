@@ -20,24 +20,6 @@ Material :: union {
     Dielectric,
 }
 
-HitRecord :: struct {
-    p: Point3,
-    normal: Vec3,
-    t: f64,
-    front_face: bool,
-    material: Material
-}
-
-set_face_normal :: proc(hit_record: ^HitRecord, ray: Ray, norm: Vec3) {
-    hit_record.front_face = dot(ray.direction, norm) < 0;
-    if hit_record.front_face {
-        hit_record.normal = norm;
-    } else {
-        hit_record.normal = -1 * norm;
-    }
-
-}
-
 @(private = "file")
 scatter_lambertian :: proc(material: Lambertian, ray: Ray, hit_record: HitRecord) -> (attenuation: Color, scattered: Ray, ok: bool) {
     scattered_direction := hit_record.normal + random_unit_vector();
