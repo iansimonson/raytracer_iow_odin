@@ -77,9 +77,11 @@ ray_color :: proc(ray: rt.Ray, world: []rt.Sphere, depth: i32) -> rt.Color {
     if depth <= 0 { return rt.Color{0, 0, 0}; }
 
     hit_record : rt.HitRecord;
+    attenuation: rt.Color;
+    scattered: rt.Ray;
 
     if did_hit := rt.hit(world, ray, 0.001, rt.infinity, &hit_record); did_hit {
-        if attenuation, scattered, ok := rt.scatter(hit_record.material, ray, hit_record); ok {
+        if ok := rt.scatter(hit_record.material, ray, hit_record, &attenuation, &scattered); ok {
             next_rc := ray_color(scattered, world, depth - 1);
             return next_rc * attenuation;
         }

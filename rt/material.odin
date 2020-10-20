@@ -21,25 +21,23 @@ Material :: union {
 }
 
 @(private = "file")
-scatter_lambertian :: proc(material: Lambertian, ray: Ray, hit_record: HitRecord) -> (attenuation: Color, scattered: Ray, ok: bool) {
+scatter_lambertian :: proc(material: Lambertian, ray: Ray, hit_record: HitRecord, attenuation: ^Color, scattered: ^Ray) -> bool {
     scattered_direction := hit_record.normal + random_unit_vector();
-    scattered = Ray{origin = hit_record.p, direction = scattered_direction};
-    attenuation = material.albedo;
-    ok = true;
-    return;
+    scattered^ = Ray{origin = hit_record.p, direction = scattered_direction};
+    attenuation^ = material.albedo;
+    return true;
 }
 
 @(private = "file")
-scatter_metal :: proc(material: Metal, ray: Ray, hit_record: HitRecord) -> (attenuation: Color, scattered: Ray, ok: bool) {
+scatter_metal :: proc(material: Metal, ray: Ray, hit_record: HitRecord, attenuation: ^Color, scattered: ^Ray) -> bool {
     reflected := reflect_around_vector(unit_vector(ray.direction), hit_record.normal);
-    scattered = Ray{origin = hit_record.p, direction = reflected};
-    attenuation = material.albedo;
-    ok = dot(scattered.direction, hit_record.normal) > 0;
-    return;
+    scattered^ = Ray{origin = hit_record.p, direction = reflected};
+    attenuation^ = material.albedo;
+    return dot(scattered.direction, hit_record.normal) > 0;
 }
 
 @(private = "file")
-scatter_dielectric :: proc(material: Dielectric, ray: Ray, hit_record: HitRecord) -> (attenuation: Color, scattered: Ray, ok: bool) {
+scatter_dielectric :: proc(material: Dielectric, ray: Ray, hit_record: HitRecord, attenuation: ^Color, scattered: ^Ray) -> bool {
     schlick :: proc(cos: f64, ridx: f64) -> f64 {
         r0 := (1 - ridx) / (1 + ridx);
         r1 := r0 * r0;
@@ -62,21 +60,20 @@ scatter_dielectric :: proc(material: Dielectric, ray: Ray, hit_record: HitRecord
         direction = refract(unit_direction, hit_record.normal, etai_over_etat);
     }
 
-    scattered = Ray{origin = hit_record.p, direction = direction};
-    attenuation = Color{1, 1, 1};
-    ok = true;
-    return;
+    scattered^ = Ray{origin = hit_record.p, direction = direction};
+    attenuation^ = Color{1, 1, 1};
+    return true;
 }
 
 @(private = "file")
 scatter_material :: proc{scatter_lambertian, scatter_metal, scatter_dielectric};
 
-scatter :: proc(material: Material, ray: Ray, hit_record: HitRecord) -> (attenuation: Color, scattered: Ray, ok: bool) {
+scatter :: proc(material: Material, ray: Ray, hit_record: HitRecord, attenuation: ^Color, scattered: ^Ray) -> bool {
     switch mat in material {
-    case Lambertian: return scatter_material(mat, ray, hit_record);
-    case Metal: return scatter_material(mat, ray, hit_record);
-    case Dielectric: return scatter_material(mat, ray, hit_record);
+    case Lambertian: return scatter_material(mat, ray, hit_record, attenuation, scattered);
+    case Metal: return scatter_material(mat, ray, hit_record, attenuation, scattered);
+    case Dielectric: return scatter_material(mat, ray, hit_record, attenuation, scattered);
     }
 
-    return {}, {}, false;
+    return false;
 }
