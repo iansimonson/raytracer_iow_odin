@@ -57,6 +57,7 @@ hit_sphere :: proc(sphere: Sphere, ray: Ray, t_min, t_max: f64, hit_record: ^Hit
             hit_record.p = ray_at(ray, hit_record.t);
             outward_normal := Vec3((hit_record.p - sphere.center) / sphere.radius);
             set_face_normal(hit_record, ray, outward_normal);
+            hit_record.material = sphere.material;
             return true;
         }
 
@@ -66,6 +67,7 @@ hit_sphere :: proc(sphere: Sphere, ray: Ray, t_min, t_max: f64, hit_record: ^Hit
             hit_record.p = ray_at(ray, hit_record.t);
             outward_normal := Vec3((hit_record.p - sphere.center) / sphere.radius);
             set_face_normal(hit_record, ray, outward_normal);
+            hit_record.material = sphere.material;
             return true;
         }
 
